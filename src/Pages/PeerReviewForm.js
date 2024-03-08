@@ -1,106 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { db } from '../firebase-config';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 
 const PeerReviewForm = () => {
   const { currentUser } = useAuth();
-  const [review, setReview] = useState({ rating: '', comments: '' });
-  const [users, setUsers] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [comments, setComments] = useState('');
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const usersCollectionRef = collection(db, "users");
-      const data = await getDocs(usersCollectionRef);
-      setUsers(data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-                       .filter(u => u.id !== currentUser?.uid)); // Exclude the current user
-    };
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setSearchResults([]); // Clear previous search results
+    setSelectedUser(null); // Clear selected user
 
-    if (currentUser) fetchUsers();
-  }, [currentUser]);
+    const usersRef = collection(db, "users");
+    // Create queries for each field
+    const queries = [
+      query(usersRef, where("firstName", "==", searchText)),
+      query(usersRef, where("lastName", "==", searchText)),
+      query(usersRef, where("studentId", "==", searchText)),
+    ];
+    
+    // Execute all queries in parallel
+    const querySnapshots = await Promise.all(queries.map(q => getDocs(q)));
+    const results = querySnapshots
+      .flatMap(snapshot => snapshot.docs)
+      .map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Remove duplicates based on id
+    const uniqueResults = Array.from(new Map(results.map(result => [result.id, result])).values());
+
+    setSearchResults(uniqueResults);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!currentUser) {
-      alert("You must be logged in to submit a review.");
+    if (!comments) {
+      alert('Please enter some comments.');
       return;
     }
     if (!selectedUser) {
-      alert("You must select a user to review.");
+      alert('Please select a user to review.');
       return;
     }
-
-    try {
-      await addDoc(collection(db, "peerReviews"), {
-        ...review,
-        userId: selectedUser.id, // The user who is being reviewed
-        reviewerId: currentUser.uid, // The reviewer
-        createdAt: new Date(),
-      });
-      alert('Review submitted successfully.');
-      setReview({ rating: '', comments: '' });
-      setSelectedUser(null);
-    } catch (error) {
-      console.error("Error submitting review: ", error);
-      alert("Error submitting review: " + error.message);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setReview(prevReview => ({ ...prevReview, [name]: value }));
+    
+    // Add document to 'peerReviews' collection in Firestore
+    await addDoc(collection(db, "peerReviews"), {
+      comments: comments,
+      userId: selectedUser.id, // The user being reviewed
+      reviewerId: currentUser.uid, // The current logged-in user
+      createdAt: new Date(),
+    });
+    setComments('');
+    setSelectedUser(null);
+    alert('Review submitted successfully.');
   };
 
   return (
     <Box className="container mt-5 form-container">
       <h2>Peer Review Form</h2>
+      <Box component="form" onSubmit={handleSearch} noValidate sx={{ mt: 1 }}>
+        <TextField
+          fullWidth
+          label="Search by First Name, Last Name, or Student ID"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <Button type="submit" variant="contained" sx={{ mb: 2 }}>
+          Search
+        </Button>
+        {searchResults.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            {searchResults.map((user) => (
+              <Box key={user.id} sx={{ my: 1 }}>
+                <Button variant="outlined" onClick={() => setSelectedUser(user)}>
+                  {user.displayName || `${user.firstName} ${user.lastName}`}
+                </Button>
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        <Autocomplete
-          disablePortal
-          id="user-select-autocomplete"
-          options={users}
-          getOptionLabel={(option) => option.displayName || option.email}
-          sx={{ mb: 2, width: 300 }}
-          renderInput={(params) => <TextField {...params} label="Select a student" required />}
-          onChange={(event, newValue) => setSelectedUser(newValue)}
-        />
         <TextField
-          margin="normal"
-          required
           fullWidth
-          id="rating"
-          label="Rating"
-          name="rating"
-          autoComplete="rating"
-          autoFocus
-          value={review.rating}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
           required
-          fullWidth
-          name="comments"
-          label="Comments"
-          type="text"
-          id="comments"
-          autoComplete="comments"
           multiline
           rows={4}
-          value={review.comments}
-          onChange={handleChange}
+          name="comments"
+          label="Comments"
+          value={comments}
+          onChange={(e) => setComments(e.target.value)}
+          sx={{ mt: 3 }}
         />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
+        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
           Submit Review
         </Button>
       </Box>

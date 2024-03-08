@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase-config';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const CreateBio = () => {
   const { currentUser } = useAuth();
@@ -13,6 +13,20 @@ const CreateBio = () => {
     careerGoals: ''
   });
 
+  useEffect(() => {
+    const fetchBioData = async () => {
+      if (currentUser) {
+        const bioRef = doc(db, "bios", currentUser.uid);
+        const bioSnap = await getDoc(bioRef);
+        if (bioSnap.exists()) {
+          setBioData(bioSnap.data());
+        }
+      }
+    };
+
+    fetchBioData();
+  }, [currentUser]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) {
@@ -20,12 +34,10 @@ const CreateBio = () => {
       return;
     }
 
-    const skillsArray = bioData.skills.split(',').map(skill => skill.trim()); // Convert skills string to array
-
+    // No need to convert skills to an array unless specifically needed for other operations.
     try {
       await setDoc(doc(db, "bios", currentUser.uid), {
         ...bioData,
-        skills: skillsArray,
         updatedAt: new Date(),
       });
       alert('Bio updated successfully.');
@@ -47,6 +59,7 @@ const CreateBio = () => {
     <div className="container mt-5">
       <h2>Create Your Bio</h2>
       <form onSubmit={handleSubmit} className="form-container">
+        <label>Bio:</label>
         <textarea
           name="bio"
           className="form-control"
@@ -55,6 +68,7 @@ const CreateBio = () => {
           placeholder="Tell us about yourself"
           required
         />
+        <label>Skills:</label>
         <input
           name="skills"
           type="text"
@@ -63,6 +77,7 @@ const CreateBio = () => {
           onChange={handleChange}
           placeholder="List your skills, separated by commas"
         />
+        <label>Achievements:</label>
         <textarea
           name="achievements"
           className="form-control"
@@ -70,6 +85,7 @@ const CreateBio = () => {
           onChange={handleChange}
           placeholder="Your achievements"
         />
+        <label>Interests:</label>
         <textarea
           name="interests"
           className="form-control"
@@ -77,6 +93,7 @@ const CreateBio = () => {
           onChange={handleChange}
           placeholder="Your interests"
         />
+        <label>Career Goals:</label>
         <textarea
           name="careerGoals"
           className="form-control"

@@ -114,3 +114,27 @@ a:hover {
   }
 }
 
+/* Footer Styles */
+.footer {
+  background-color: #333;
+  padding: 20px 0;
+  color: white;
+  text-align: center;
+}
+
+.footer a {
+  color: white;
+  margin: 0 15px;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Ensure that the footer is at the bottom */
+.content-wrap {
+  min-height: calc(100vh - 150px); /* Adjust the px value depending on the height of your footer and navbar */
+  padding-bottom: 50px; /* This should roughly match the height of your footer */
+}
+

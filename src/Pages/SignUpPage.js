@@ -30,12 +30,14 @@ const SignUpPage = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, formValues.password);
       const user = userCredential.user;
+      // Concatenate firstName and lastName to create displayName
+      const displayName = `${formValues.firstName} ${formValues.lastName}`;
       await setDoc(doc(db, 'users', user.uid), {
         firstName: formValues.firstName,
         lastName: formValues.lastName,
         email: formValues.email,
         studentId: formValues.studentId,
-        // Include additional fields as necessary
+        displayName: displayName, // Add displayName to the user document
       });
       navigate('/registration-success');
     } catch (error) {
