@@ -34,13 +34,12 @@ const SelfEvaluationForm = () => {
       onSubmit={handleSubmit}
       noValidate
       sx={{ mt: 1 }}
-      className="form-container"
-    >
-      <Typography variant="h5" gutterBottom>
-        Self-Evaluation
-      </Typography>
+      className="container mt-5 form-container">
+      <h2>Self-Evaluation</h2>
+      <div className="form-container">
+        <label>Leave a self-evaluation</label>
       <TextField
-        label="Your Self-Evaluation"
+        label="Semester/Module/Your Self-Evaluation"
         multiline
         fullWidth
         rows={4}
@@ -54,6 +53,7 @@ const SelfEvaluationForm = () => {
           Submit Evaluation
         </Button>
       </Box>
+      </div>
     </Box>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase-config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Box } from '@mui/material';
 
 const CreateBio = () => {
   const { currentUser } = useAuth();
@@ -56,11 +57,13 @@ const CreateBio = () => {
   };
 
   return (
-    <div className="container mt-5">
+    <Box className="container mt-5 form-container" mt={3}>
+    <div>
       <h2>Create Your Bio</h2>
       <form onSubmit={handleSubmit} className="form-container">
         <label>Bio:</label>
         <textarea
+          id="bio"
           name="bio"
           className="form-control"
           value={bioData.bio}
@@ -70,6 +73,7 @@ const CreateBio = () => {
         />
         <label>Skills:</label>
         <input
+          id="skills"
           name="skills"
           type="text"
           className="form-control"
@@ -79,6 +83,7 @@ const CreateBio = () => {
         />
         <label>Achievements:</label>
         <textarea
+          id="achievements"
           name="achievements"
           className="form-control"
           value={bioData.achievements}
@@ -87,6 +92,7 @@ const CreateBio = () => {
         />
         <label>Interests:</label>
         <textarea
+          id="interests"
           name="interests"
           className="form-control"
           value={bioData.interests}
@@ -95,6 +101,7 @@ const CreateBio = () => {
         />
         <label>Career Goals:</label>
         <textarea
+          id="careerGoals"
           name="careerGoals"
           className="form-control"
           value={bioData.careerGoals}
@@ -104,6 +111,7 @@ const CreateBio = () => {
         <button type="submit" className="btn btn-primary">Update Bio</button>
       </form>
     </div>
+    </Box>
   );
 };
 

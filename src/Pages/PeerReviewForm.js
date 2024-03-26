@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../firebase-config';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import { TextField, Box, Button, Typography } from '@mui/material';
 
 const PeerReviewForm = () => {
   const { currentUser } = useAuth();
@@ -18,27 +15,20 @@ const PeerReviewForm = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     setError('');
-    setSearchResults([]); // Clear previous search results
-    setSelectedUser(null); // Clear selected user
+    setSearchResults([]);
+    setSelectedUser(null);
 
     const usersRef = collection(db, "users");
-    // Create queries for each field
     const queries = [
       query(usersRef, where("firstName", "==", searchText)),
       query(usersRef, where("lastName", "==", searchText)),
       query(usersRef, where("studentId", "==", searchText)),
     ];
-    
-    // Execute all queries in parallel
+
     try {
       const querySnapshots = await Promise.all(queries.map(q => getDocs(q)));
-      const results = querySnapshots
-        .flatMap(snapshot => snapshot.docs)
-        .map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // Remove duplicates based on id
+      const results = querySnapshots.flatMap(snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       const uniqueResults = Array.from(new Map(results.map(result => [result.id, result])).values());
-
       setSearchResults(uniqueResults);
     } catch (err) {
       setError('Failed to search users. Please try again.');
@@ -70,11 +60,10 @@ const PeerReviewForm = () => {
     }
     
     try {
-      // Add document to 'peerReviews' collection in Firestore
       await addDoc(collection(db, "peerReviews"), {
-        comments: comments,
-        userId: selectedUser.id, // The user being reviewed
-        reviewerId: currentUser.uid, // The current logged-in user
+        comments,
+        userId: selectedUser.id,
+        reviewerId: currentUser.uid,
         createdAt: new Date(),
       });
       setComments('');
@@ -94,39 +83,51 @@ const PeerReviewForm = () => {
       <h2>Peer Review Form</h2>
       {error && <Typography color="error">{error}</Typography>}
       <Box component="form" onSubmit={handleSearch} noValidate sx={{ mt: 1 }}>
+        <label>Find a student</label>
         <TextField
           fullWidth
-          label="Search by First Name, Last Name, or Student ID"
+          label="Search by Student's First Name, Student's Last Name, or Student's ID"
+          type="textbox"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          sx={{ mb: 2 }}
+          sx={{ mt: 2, mb: 2 }}
         />
         <Button type="submit" variant="contained" sx={{ mb: 2 }}>
           Search
         </Button>
         {searchResults.length > 0 && (
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, maxHeight: 200, overflowY: 'auto' }}>
             {searchResults.map((user) => (
-              <Box key={user.id} sx={{ my: 1 }}>
-                <Button variant="outlined" onClick={() => handleUserSelect(user)}>
-                  {user.displayName || `${user.firstName} ${user.lastName}`}
-                </Button>
-              </Box>
+              <Button 
+                key={user.id} 
+                variant="outlined"
+                onClick={() => handleUserSelect(user)}
+                sx={{
+                  my: 1,
+                  bgcolor: selectedUser?.id === user.id ? 'lightgreen' : 'inherit',
+                  '&:hover': {
+                    bgcolor: 'lightgreen',
+                  }
+                }}
+              >
+                {user.displayName || `${user.firstName} ${user.lastName}`}
+              </Button>
             ))}
           </Box>
         )}
       </Box>
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <label>Leave a review</label>
         <TextField
           fullWidth
           required
           multiline
           rows={4}
-          name="comments"
-          label="Comments"
+          name="Semester/Module/Peer Review"
+          label="Semester/Module/Peer Review"
           value={comments}
           onChange={(e) => setComments(e.target.value)}
-          sx={{ mt: 3 }}
+          sx={{ mt: 2 }}
         />
         <Button type="submit" fullWidth variant="contained" disabled={!selectedUser} sx={{ mt: 3, mb: 2 }}>
           Submit Review

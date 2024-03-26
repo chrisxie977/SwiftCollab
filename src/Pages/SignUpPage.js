@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase-config';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 
 const SignUpPage = () => {
   const [formValues, setFormValues] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    role: '',
     studentId: '',
     password: '',
     confirmPassword: ''
@@ -16,12 +19,13 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { updateUserRole } = useAuth(); // Use the updateUserRole function from AuthContext
 
   const validateForm = () => {
     const newErrors = {};
     const nameRegex = /^[A-Za-z\s]+$/;
-    const studentIdRegex = /^[A-Za-z0-9]{5,10}$/; // Example pattern
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const studentIdRegex = /^[0-9]{1,8}$/; 
+    const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com|outlook\.com|icloud\.com|hotmail\.com|student\.[\w-]+\.[\w-]+)$/;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
     if (!formValues.firstName || !nameRegex.test(formValues.firstName)) {
@@ -36,8 +40,12 @@ const SignUpPage = () => {
       newErrors.email = 'Please enter a valid email address.';
     }
 
-    if (!formValues.studentId || !studentIdRegex.test(formValues.studentId)) {
-      newErrors.studentId = 'Student ID must be 5-10 alphanumeric characters.';
+    if (!formValues.role) {
+      newErrors.role = 'Please select a role.';
+    }
+
+    if (formValues.role === 'student' && (!formValues.studentId || !studentIdRegex.test(formValues.studentId))) {
+      newErrors.studentId = 'Student ID must be 8 numeric number.';
     }
 
     if (!formValues.password || !passwordRegex.test(formValues.password)) {
@@ -75,10 +83,14 @@ const SignUpPage = () => {
         firstName: formValues.firstName,
         lastName: formValues.lastName,
         email: formValues.email,
+        role: formValues.role,
         studentId: formValues.studentId,
         displayName: displayName,
       });
 
+      // Update userRole in AuthContext
+      await updateUserRole(user.uid, formValues.role); // Now using updateUserRole
+      
       setLoading(false);
       navigate('/registration-success');
     } catch (error) {
@@ -88,8 +100,8 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <h2 className="form-heading">Sign Up</h2>
+    <div className="container mt-5 form-container" sx={{ maxWidth: 800 }}>
+      <h2>Sign Up</h2>
       <form onSubmit={handleSignUp} className="form-container">
         <input type="text" name="firstName" value={formValues.firstName} onChange={handleInputChange} placeholder="First Name" required />
         {errors.firstName && <p className="error-message">{errors.firstName}</p>}
@@ -99,10 +111,23 @@ const SignUpPage = () => {
         
         <input type="email" name="email" value={formValues.email} onChange={handleInputChange} placeholder="Email" required />
         {errors.email && <p className="error-message">{errors.email}</p>}
-        
-        <input type="text" name="studentId" value={formValues.studentId} onChange={handleInputChange} placeholder="Student ID" required />
-        {errors.studentId && <p className="error-message">{errors.studentId}</p>}
-        
+
+        <select name="role" value={formValues.role} onChange={handleInputChange} required>
+          <option value="">Select Role</option>
+          <option value="student">Student</option>
+          <option value="non-student">Non-Student</option>
+        </select>
+
+        {errors.role && <div className="text-danger">{errors.role}</div>}
+
+        {formValues.role === 'student' && (
+          <div className="form-group mb-3">
+            <input className="form-control" type="text" name="studentId" value={formValues.studentId} onChange={handleInputChange}
+             placeholder="Student ID" maxLength="8" required/>
+            {errors.studentId && <div className="text-danger">{errors.studentId}</div>}
+          </div>
+        )}
+
         <input type="password" name="password" value={formValues.password} onChange={handleInputChange} placeholder="Password" required />
         {errors.password && <p className="error-message">{errors.password}</p>}
         

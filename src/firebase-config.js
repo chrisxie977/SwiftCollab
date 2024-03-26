@@ -5,12 +5,13 @@ import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB4DgYm3K9_IsM1hEWDo6tCIaqEVFnZKBc",
-  authDomain: "swiftcollabv2.firebaseapp.com",
-  projectId: "swiftcollabv2",
-  storageBucket: "swiftcollabv2.appspot.com",
-  messagingSenderId: "377647249909",
-  appId: "1:377647249909:web:dd408ca3f73ee2e7cec8bc"
+  apiKey: "AIzaSyAYw3nIAqaFU0B5zF9JB6b9AZZvQDStZwI",
+  authDomain: "swiftcollab.firebaseapp.com",
+  projectId: "swiftcollab",
+  storageBucket: "swiftcollab.appspot.com",
+  messagingSenderId: "411635818787",
+  appId: "1:411635818787:web:aa878f876f547034d0ac96",
+  measurementId: "G-9EPXTBEL3D"
 };
 
 // Initialize Firebase

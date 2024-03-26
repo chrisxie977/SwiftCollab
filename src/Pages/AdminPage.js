@@ -63,10 +63,11 @@ const AdminPage = () => {
   }
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>Admin Page</Typography>
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="h6">Reported Reviews</Typography>
+    <Box className="container mt-5 form-container">
+      <h2>Admin Page</h2>
+      <div className="form-container">
+      <label>Reported Reviews</label>
+      <Paper variant="outlined" sx={{ mt:2, p: 2 }}>
         <List>
           {reportedReviews.map((review) => (
             <ListItem key={review.id} sx={{ mb: 2, border: '1px solid', borderRadius: '4px' }}>
@@ -86,6 +87,7 @@ const AdminPage = () => {
         </List>
         {reportedReviews.length === 0 && <Typography>No reported reviews.</Typography>}
       </Paper>
+      </div>
     </Box>
   );
 };

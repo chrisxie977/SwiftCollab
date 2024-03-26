@@ -36,8 +36,8 @@ button {
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid transparent;
-  color: #fff;
-  background-color: #007bff;
+  color: hwb(0 4% 96%);
+  background-color: hsl(16, 100%, 50%);
   transition: background-color 0.15s ease-in-out;
 }
 
@@ -76,14 +76,51 @@ a:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Aligning the brand logo with flexible margins */
+.navbar-brand2 {
+  display: flex;
+  height: 50px;
+  padding: 7px;
+  justify-content: center; /* Center brand logo */
+  margin: auto; /* Auto margins for auto-alignment */
+}
+
+.navbar-nav {
+  margin-left: auto; /* Move nav items to the right */
+}
+
 .nav-link {
-  margin-right: 0.5rem; /* Adjust spacing between nav items */
+  margin-right: 10px;
+  display: flex;
+  height: 70px;
+  align-items: center;
+  font-size: 0px;
+  transition: font-size 0.3s; /* Smooth transition for hover effect */
+}
+
+.nav-link:hover {
+  font-size: 20px;
+}
+
+/* Logout button alignment and transition */
+.btn-logout {
+  background-color: #fff; /* Initial color corrected */
+  border: 1px solid transparent; /* Added border to maintain size on hover */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content inside the button */
+  transition: background-color 0.3s, font-size 0.3s, width 0.3s; /* Smooth transitions */
+}
+
+.btn-logout:hover {
+  background-color: hsl(158, 5%, 45%);
+  width: 140px; /* Adjusted width on hover */
+  font-size: 18px;
 }
 
 /* Button customization for a more polished look */
 .btn {
   padding: 0.375rem 0.75rem;
-  margin-right: 0.5rem;
   border: none; /* Removes border for a cleaner look */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.2s, box-shadow 0.2s;
@@ -94,30 +131,37 @@ a:hover {
 }
 
 .btn-primary {
-  background-color: #0056b3; /* A darker shade for the primary button */
+  background-color: #1976d2; /* A darker shade for the primary button */
 }
 
 .btn-secondary {
   background-color: #6c757d; /* A darker shade for the secondary button */
 }
 
-/* Responsive layout for smaller screens */
+/* Responsive layout adjustments */
 @media (max-width: 768px) {
+  .navbar-brand2 {
+    margin-left: 0; /* Reset margin for small screens */
+  }
+
   .navbar-nav {
     width: 100%;
     text-align: center;
   }
-  .nav-link {
+
+  .nav-link, .btn-logout {
     display: block;
-    margin-right: 0;
-    margin-bottom: 0.5rem;
+    width: auto; /* Full width for small screens */
+    margin: 0 auto 0.5rem; /* Center align and add space below */
+    font-size: 18px; /* Show text for small screens */
   }
 }
+
 
 /* Footer Styles */
 .footer {
   background-color: #333;
-  padding: 20px 0;
+  padding: 5px;
   color: white;
   text-align: center;
 }
@@ -134,7 +178,7 @@ a:hover {
 
 /* Ensure that the footer is at the bottom */
 .content-wrap {
-  min-height: calc(100vh - 150px); /* Adjust the px value depending on the height of your footer and navbar */
+  min-height: calc(100vh - 272px); /* Adjust the px value depending on the height of your footer and navbar */
   padding-bottom: 50px; /* This should roughly match the height of your footer */
 }
 
